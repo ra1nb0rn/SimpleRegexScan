@@ -15,12 +15,12 @@ To install the required Python packages and create a symlink, run:
 ```
 ./install.sh
 ```
-Alternatively, you can enter the installation commands directly:
+The installation script needs to be run as root user to create a symlink in "/usr/local/bin". Alternatively, you can run the installation commands directly:
 ```
 pip3 install -r requirements.txt
 ln -sf "$(pwd)/simple_regex_scan.py" /usr/local/bin/simple_regex_scan
 ```
-Make sure you use the pip for Python 3.
+Make sure you use your correct pip for Python 3.
 
 ## Usage
 The usage information can be viewed with the command ``simple_regex_scan -h`` and is as folows:
@@ -75,7 +75,7 @@ Simple Regex Scan provides five predefined regexes that are used by default. If 
 ```
 simple_regex_scan -f -c "(eval.*(.*\\\$.*);" /var/www/html/mycms
 ```
-This has the tool scan all PHP files within the directory "/var/www/html/mycms" for file inclusions and the use of the ``eval(...)`` function with a variable. Note the triple backslash to properly escape the dollar sign in a shell environment.
+This has the tool scan all PHP files within the directory "/var/www/html/mycms" for file inclusions and the use of the ``eval(...)`` function with a variable. Note the triple backslash to properly escape the dollar sign in a shell environment. Also, because the output text can be a bit wide, be sure to stretch your terminal if you get output that is difficult to read.
 
 ## Contribution &amp; Bugs
 If you want to contribute, or have any questions or suggestions, use GitHub or directly contact me via Email <a href="mailto:dustin.born@gmx.de">here</a>. If you found a bug or have other troubles, feel free to open an issue.
