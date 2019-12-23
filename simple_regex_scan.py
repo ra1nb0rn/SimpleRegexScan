@@ -155,7 +155,7 @@ def parse_args():
 
     # add arguments for the usage of the predefined regexes
     predef_regexes = parser.add_argument_group("predefined regexes", "predefined regexes that can be used")
-    predef_regexes.add_argument("-A", "--all-regexes", default=True, action="store_true", help="Use all predefined regexes (default if no predefined regex is excplicitly specified)")
+    predef_regexes.add_argument("-A", "--all-regexes", default=True, action="store_true", help="Use all predefined regexes (default if no predefined regex is explicitly specified)")
     predef_regexes.add_argument("-N", "--no-regexes", default=False, action="store_true", help="Use none of the predefined regexes")
     predef_regexes.add_argument("-u", "--unsafe-func", action="store_true", help="Regex that indicates unsafe function usage with a variable, e.g. \"%s\"" % colored("eval($_REQUEST['cmd'])", "yellow"))
     predef_regexes.add_argument("-f", "--file-inclusion", action="store_true", help="Regex that indicates file inclusion via a variable, e.g. \"%s\"" % colored("include 'modules/'.$_REQUEST['module']", "yellow"))

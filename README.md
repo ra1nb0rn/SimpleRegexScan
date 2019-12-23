@@ -23,7 +23,7 @@ ln -sf "$(pwd)/simple_regex_scan.py" /usr/local/bin/simple_regex_scan
 Make sure you use your correct pip for Python 3.
 
 ## Usage
-The usage information can be viewed with the command ``simple_regex_scan -h`` and is as folows:
+The usage information can be viewed with the command ``simple_regex_scan -h`` and is as follows:
 ```
     _____            __      ___                     ____
    / __(_)_ _  ___  / /__   / _ \___ ___ ______ __  / __/______ ____
@@ -53,7 +53,7 @@ predefined regexes:
   predefined regexes that can be used
 
   -A, --all-regexes     Use all predefined regexes (default if no predefined
-                        regex is excplicitly specified)
+                        regex is explicitly specified)
   -N, --no-regexes      Use none of the predefined regexes
   -u, --unsafe-func     Regex that indicates unsafe function usage with a
                         variable, e.g. "eval($_REQUEST['cmd'])"
@@ -69,13 +69,13 @@ predefined regexes:
 Example: simple_regex_scan -ufs -i /var/www/html/mycms
 ```
 
-Simple Regex Scan provides five predefined regexes that are used by default. If any flag out of ``{-u, -f, -k, -s, -x}`` is specified, all non predefined regexes that are not explicitly specifed are not used.
+Simple Regex Scan provides five predefined regexes that are used by default. If any flag out of ``{-u, -f, -k, -s, -x}`` is specified, all non predefined regexes that are not explicitly specified are not used.
 
 **Example call:**
 ```
 simple_regex_scan -f -c "(eval.*(.*\\\$.*);" /var/www/html/mycms
 ```
-This has the tool scan all PHP files within the directory "/var/www/html/mycms" for file inclusions and the use of the ``eval(...)`` function with a variable. Note the triple backslash to properly escape the dollar sign in a shell environment. Also, because the output text can be a bit wide, be sure to stretch your terminal if you get output that is difficult to read.
+This has the tool scan all PHP files within the directory "/var/www/html/mycms" for file inclusions and the use of the ``eval(...)`` function with a variable. Note the triple backslash to properly escape the dollar sign in a shell environment. Also, because the output text can be a bit wide, be sure to stretch your terminal if you get output that is difficult to read. Alternatively you can disable colored output and print the results to a file via I/O redirection.
 
 ## Contribution &amp; Bugs
 If you want to contribute, or have any questions or suggestions, use GitHub or directly contact me via Email <a href="mailto:dustin.born@gmx.de">here</a>. If you found a bug or have other troubles, feel free to open an issue.
