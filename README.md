@@ -4,7 +4,7 @@ A small script that searches files for insecure code patterns via regular expres
 <p>
 <a href="#"><img src="https://img.shields.io/badge/python-3.6%2B-red" alt="Python 3.6+"></a>
 <a href="#"><img src="https://img.shields.io/badge/platform-linux%20%7C%20macOS-%23557ef6" alt="Platform: linux, macOS"></a>
-<a href="https://github.com/DustinBorn/avain/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"></a>
+<a href="https://github.com/DustinBorn/SimpleRegexScan/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"></a>
 </p>
 
 ## About
