@@ -210,6 +210,7 @@ def parse_args():
     parser.add_argument("-e", "--extension", default="php", help="Specify the file extension of files to search (php by default)")
     parser.add_argument("--no-color", action="store_true", help="Do not color the output")
     parser.add_argument("-i", "--input", nargs="+", help="Input one or more files or directories to search", required=True)
+    parser.add_argument("-o", "--output", help="A file to save the final results to", required=False)
 
     # add arguments for the usage of the predefined regexes
     predef_regexes = parser.add_argument_group("predefined regexes", "predefined regexes that can be used")
@@ -238,7 +239,7 @@ def parse_args():
     return args
 
 
-def print_results(results, use_color):
+def print_results(results, use_color, outfile):
     """ Print the given scan results """
 
     table = AsciiTable([["File", "Type", "Code", "Line Number"]] + results)
@@ -250,7 +251,10 @@ def print_results(results, use_color):
     output = table.table.split("\n")
     output[2] = output[2].replace("-", "=")
     print("\n".join(output) + "\n")
-    my_print("[+] Analysis complete: %d suspicious code fragments found" % len(results), "blue")
+    if outfile:
+        with open(outfile, "w") as f:
+            f.write("\n".join(output) + "\n")
+    my_print("[+] Analysis complete: %d suspicious code fragments found" % len(results), "blue", use_color=use_color)
 
 
 def my_print(text, color=None, use_color=True):
@@ -279,4 +283,4 @@ if __name__ == "__main__":
     files = crawl(args.input, args.extension, not args.no_color)
     if files:
         results = scan(files, get_regexes(args), not args.no_color)
-        print_results(results, not args.no_color)
+        print_results(results, not args.no_color, args.output)
