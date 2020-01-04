@@ -16,7 +16,8 @@ UNSAFE_FUNCTION_REGEX_DIRECT_INPUT = re.compile(r"([ \t]*(%s)\s*\([^;]*\$_(GET|P
 FILE_INCLUSION_FUNCTIONS = ["include", "include_once", "require", "require_once"]
 FILE_INCLUSION_REGEX = re.compile(r"([ \t]*(%s)[\( ][^=\n]*\$[^;]*;?)" % "|".join(FILE_INCLUSION_FUNCTIONS))
 COOKIE_REGEX = re.compile(r"([ \t]*(\$_COOKIE\[.*\]))")
-SQLI_REGEX = re.compile(r"(SELECT[^;]*FROM[^;]*WHERE[^;]*(\$\S+)[^;]*;?)")
+SQLI_REGEX = re.compile(r"(SELECT[^;]*FROM[^;]*WHERE[^;]*(\$\S+)[^;]*;)")
+SQLI_REGEX_DIRECT = re.compile(r"(SELECT[^;]*FROM[^;]*WHERE[^;]*(\$_(GET|POST|COOKIE)\[[^;]*\])[^;]*;)")
 XSS_REGEX = re.compile(r"[^;]*(echo[^;]*(\$_(GET|POST|COOKIE|REQUEST)\[\s*\S*\s*\])[^;]*;?)")
 
 
@@ -163,10 +164,15 @@ def get_regexes(args):
             regexes["file inclusion"] = FILE_INCLUSION_REGEX
         if args.cookie_usage:
             regexes["cookie usage"] = COOKIE_REGEX
-        if args.sqli:
-            regexes["sqli"] = SQLI_REGEX
         if args.xss:
             regexes["xss"] = XSS_REGEX
+
+        if args.sqli_all:
+            regexes["sqli"] = SQLI_REGEX
+        elif args.sqli:
+            regexes["sqli"] = SQLI_REGEX_DIRECT
+
+
 
     # include user-custom regexes if any
     if args.custom_regex:
@@ -189,12 +195,13 @@ def parse_args():
     # add arguments for the usage of the predefined regexes
     predef_regexes = parser.add_argument_group("predefined regexes", "predefined regexes that can be used")
     predef_regexes.add_argument("-A", "--all-regexes", default=True, action="store_true", help="Use all predefined regexes (default if no predefined regex is explicitly specified)")
-    predef_regexes.add_argument("-N", "--no-regexes", default=False, action="store_true", help="Use none of the predefined regexes")
+    predef_regexes.add_argument("-N", "--no-regexes", default=False, action="store_true", help="Use none of the predefined regexes (defaults to true if one of the predefined regexes is explicitly specified)")
     predef_regexes.add_argument("-u", "--unsafe-func", action="store_true", help="Regex that indicates unsafe function usage with a variable, e.g. \"%s\"" % colored("eval($_REQUEST['cmd'])", "yellow"))
     predef_regexes.add_argument("-f", "--file-inclusion", action="store_true", help="Regex that indicates file inclusion via a variable, e.g. \"%s\"" % colored("include 'modules/'.$_REQUEST['module']", "yellow"))
     predef_regexes.add_argument("-k", "--cookie-usage", action="store_true", help="Regex that indicates usage of a cookie, e.g. \"%s\"" % colored("$_COOKIE['ID']", "yellow"))
-    predef_regexes.add_argument("-s", "--sqli", action="store_true", help="Regex that indicates an SQL Injection code pattern, e.g. \"%s\"" % colored(".. WHERE ID = \\''.$_REQUEST['ID'].'\\''", "yellow"))
-    predef_regexes.add_argument("-x", "--xss", action="store_true", help="Regex that indicates an XSS code pattern, e.g. \"%s\"" % colored("echo 'Username: '.$_REQUEST['user']", "yellow"))
+    predef_regexes.add_argument("-s", "--sqli", action="store_true", help="Regex that indicates an SQL Injection code pattern with direct usage of HTTP params, e.g. \"%s\"" % colored("... WHERE ID = \\''.$_REQUEST['ID'].'\\''", "yellow"))
+    predef_regexes.add_argument("-S", "--sqli-all", action="store_true", help="Regex that indicates an SQL Injection code pattern with or without direct usage of HTTP params, e.g. \"%s\"" % colored("... WHERE ID = \\''$id.'\\''", "yellow"))
+    predef_regexes.add_argument("-x", "--xss", action="store_true", help="Regex that indicates an XSS code pattern with direct usage of HTTP params, e.g. \"%s\"" % colored("echo 'Username: '.$_REQUEST['user']", "yellow"))
 
     # parse the given command line arguments
     args = parser.parse_args()
@@ -202,7 +209,7 @@ def parse_args():
         args.extension = "." + args.extension
     if args.no_regexes:
         args.all_regexes = False
-    if args.unsafe_func or args.file_inclusion or args.cookie_usage or args.sqli or args.xss:
+    if args.unsafe_func or args.file_inclusion or args.cookie_usage or args.sqli or args.sqli_all or args.xss:
         args.all_regexes = False
     if args.custom_regex:
         for i, regex in enumerate(args.custom_regex):
