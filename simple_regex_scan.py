@@ -4,11 +4,10 @@ import argparse
 import glob
 import os
 import re
-import sys
 import textwrap
-import time
 from termcolor import colored, cprint
 from terminaltables import AsciiTable
+import chardet
 
 # Definition of predefined regexes
 UNSAFE_FUNCTIONS = ["system", "shell_exec", "exec", "passthru", "eval", "popen", "unserialize", "file_put_contents"]
@@ -69,8 +68,18 @@ def scan(files, regexes, use_color):
     results = []
     my_print("[+] Started analysis ...", "green", use_color)
     for file in files:
-        with open(file) as f:
+        with open(file, "rb") as f:
+            # read binary file content, determine encoding and decode appropriately
             content = f.read()
+            encoding = chardet.detect(content)["encoding"]
+            if encoding:
+                content = content.decode(encoding)
+            else:
+                try:
+                    content = content.decode()
+                except UnicodeDecodeError:
+                    # if content cannot be decoded, skip the file
+                    continue
 
         # match all used regexes against the file contents
         findings = {}
@@ -85,7 +94,7 @@ def scan(files, regexes, use_color):
                 found = set()  # store already discovered matches
                 for match in finding_set.copy():
                     # extract the broad finding of the regex ...
-                    if isinstance(match, tuple) or isinstance(match, list):
+                    if isinstance(match, (list, tuple)):
                         # ... which is the first group in a mutli-element match
                         finding = match[0]
                     else:
@@ -191,7 +200,7 @@ def print_results(results, use_color):
     output = table.table.split("\n")
     output[2] = output[2].replace("-", "=")
     print("\n".join(output))
-    my_print("[+] Analysis complete: %d suspicious code fragments found" % len(results) , "blue")
+    my_print("[+] Analysis complete: %d suspicious code fragments found" % len(results), "blue")
 
 
 def my_print(text, color=None, use_color=True):
