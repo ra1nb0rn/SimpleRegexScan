@@ -68,8 +68,18 @@ def scan(files, regexes, use_color):
     """
 
     results = []
-    my_print("[+] Started analysis ...", "green", use_color)
-    for file in files:
+    my_print("[+] Started analysis ...\n", "green", use_color)
+    total = len(files)
+    print_modulo, one_percent_modulo = int(0.001 * total), int(0.01 * total)
+    for i, file in enumerate(files):
+        if (print_modulo == 0 or (print_modulo > 0 and (i % print_modulo == 0)) or
+                (one_percent_modulo == 0 or (one_percent_modulo > 0 and i % one_percent_modulo))):
+            percent = int(100*i / total)
+            if use_color:
+                print_str = "Progress: [" + colored(percent * "=", "green") + (100 - percent) * "·" + "]  " + str(percent) + "%% (%d / %d files)" % (i, total)
+            else:
+                print_str = "Progress: [" + percent * "=" + (100 - percent) * "·" + "]  " + str(percent) + "%% (%d / %d files)" % (i, total)
+            print(print_str, end="\r")
         with open(file, "rb") as f:
             # read binary file content, determine encoding and decode appropriately
             content = f.read()
@@ -130,16 +140,27 @@ def scan(files, regexes, use_color):
                     lineno = sorted_line_matches[found_counts[finding]] + 1
                     found_counts[finding] += 1
 
-                    # textwrap the finding to better fit terminal size (from https://stackoverflow.com/a/26538082)
-                    code = "\n".join(["\n".join(textwrap.wrap(line, 80, break_long_words=False, replace_whitespace=False))
-                                        for line in finding.strip().splitlines() if line.strip() != ""])
+                    # textwrap the finding to improve display of results
+                    code = finding.strip()
+                    code = re.sub(r' +', ' ', code)
+                    code = re.sub(r'\t+', '\t', code)
+                    code = re.sub(r'\n+', '\n', code)
+                    # textwrap every line individually
+                    code = "\n".join(["\n".join(textwrap.wrap(line, 80))
+                                        for line in code.splitlines() if line.strip() != ""])
 
                     # if there is a second group in the match, highlight it
                     if use_color and isinstance(match, tuple) or isinstance(match, list):
                         code = code.replace(match[1], colored(match[1], "red"))
 
                     # append the finding to the results
-                    results.append((file, type_, code, lineno))
+                    results.append((file.strip(), type_.strip(), code.strip(), str(lineno)))
+
+    if use_color:
+        print_str = "Progress: [" + colored(99 * "=", "green") + colored(">", "green") + "]  100%% " + "(%d / %d files)" % (total, total)
+    else:
+        print_str = "Progress: [" + 99 * "=" + ">" + "]  100%% " + "(%d / %d files)" % (total, total)
+    print(print_str + "\n")
 
     return results
 
@@ -171,8 +192,6 @@ def get_regexes(args):
             regexes["sqli"] = SQLI_REGEX
         elif args.sqli:
             regexes["sqli"] = SQLI_REGEX_DIRECT
-
-
 
     # include user-custom regexes if any
     if args.custom_regex:
@@ -230,7 +249,7 @@ def print_results(results, use_color):
     table.outer_border = True
     output = table.table.split("\n")
     output[2] = output[2].replace("-", "=")
-    print("\n".join(output))
+    print("\n".join(output) + "\n")
     my_print("[+] Analysis complete: %d suspicious code fragments found" % len(results), "blue")
 
 
