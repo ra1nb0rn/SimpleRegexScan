@@ -130,9 +130,9 @@ def scan(files, regexes, use_color):
                     lineno = sorted_line_matches[found_counts[finding]] + 1
                     found_counts[finding] += 1
 
-                    # textwrap the finding to better fit terminal size
-                    code_simple_whitespace = " ".join(finding.strip().split())
-                    code = "\n".join(textwrap.wrap(code_simple_whitespace, 80))
+                    # textwrap the finding to better fit terminal size (from https://stackoverflow.com/a/26538082)
+                    code = "\n".join(["\n".join(textwrap.wrap(line, 80, break_long_words=False, replace_whitespace=False))
+                                        for line in finding.strip().splitlines() if line.strip() != ""])
 
                     # if there is a second group in the match, highlight it
                     if use_color and isinstance(match, tuple) or isinstance(match, list):
