@@ -19,6 +19,7 @@ COOKIE_REGEX = re.compile(r"([ \t]*(\$_COOKIE\[.*\]))")
 SQLI_REGEX = re.compile(r"(SELECT.*FROM.*WHERE.*(\$\S+).*)")
 XSS_REGEX = re.compile(r".*(echo.*(\$_(GET|POST|COOKIE|REQUEST)\[\s*\S*\s*\]).*;?)")
 
+
 def crawl(paths, extension, use_color):
     """
     Crawl the given list of paths and return a list of all discovered files.
@@ -88,33 +89,56 @@ def scan(files, regexes, use_color):
             if finding:
                 findings[title] = finding
 
-        # try to figure out in which line the match happened
-        for i, line in enumerate(content.splitlines()):
-            for type_, finding_set in findings.items():
-                found = set()  # store already discovered matches
-                for match in finding_set.copy():
-                    # extract the broad finding of the regex ...
-                    if isinstance(match, (list, tuple)):
-                        # ... which is the first group in a mutli-element match
-                        finding = match[0]
-                    else:
-                        # ... which is the match itself if it is atomic
-                        finding = match
+        # iterate over every match and find corresponding line in code
+        for type_, finding_set in findings.items():
+            # stores how many times the same match was found across iterations
+            found_counts = {}
+            for match in finding_set.copy():
+                # extract the broad finding of the regex match ...
+                if isinstance(match, (list, tuple)):
+                    # ... which is the first group in a mutli-element match
+                    finding = match[0]
+                else:
+                    # ... which is the match itself if it is atomic
+                    finding = match
 
-                    # if the current regex finding was not already processed and matches the current line
-                    if line and finding not in found and (line.startswith(finding) or finding in line):
-                        found.add(finding)
-                        finding_set.remove(match)
+                if finding not in found_counts:
+                    found_counts[finding] = 0
 
-                        # textwrap the finding to better fit terminal size
-                        code = "\n".join(textwrap.wrap(finding.strip(), 80))
+                # stores the lines that have the longest string match with the finding
+                longest_line_matches = {}
 
-                        # if there is a second group in the match, highlight it
-                        if use_color and isinstance(match, tuple) or isinstance(match, list):
-                            code = code.replace(match[1], colored(match[1], "red"))
+                # iterate over all lines in the file and find the longest string matches
+                for i, line in enumerate(content.splitlines()):
+                    line_match_length = None
+                    if line and line in finding:
+                        line_match_length = len(line)
+                    elif line and finding in line:
+                        line_match_length = len(finding)
 
-                        # append the finding to the results
-                        results.append((file, type_, code, i+1))
+                    if line_match_length:
+                        if not longest_line_matches or list(longest_line_matches.values())[0] == line_match_length:
+                            longest_line_matches[i] = line_match_length
+                        elif list(longest_line_matches.values())[0] < line_match_length:
+                            longest_line_matches = {i: line_match_length}
+
+                # if the regex match was found in the code, add it to the results
+                if longest_line_matches:
+                    # determine on what line the match was found, skip already matched lines
+                    sorted_line_matches = sorted(longest_line_matches.keys())
+                    lineno = sorted_line_matches[found_counts[finding]] + 1
+                    found_counts[finding] += 1
+
+                    # textwrap the finding to better fit terminal size
+                    code_simple_whitespace = " ".join(finding.strip().split())
+                    code = "\n".join(textwrap.wrap(code_simple_whitespace, 80))
+
+                    # if there is a second group in the match, highlight it
+                    if use_color and isinstance(match, tuple) or isinstance(match, list):
+                        code = code.replace(match[1], colored(match[1], "red"))
+
+                    # append the finding to the results
+                    results.append((file, type_, code, lineno))
 
     return results
 
