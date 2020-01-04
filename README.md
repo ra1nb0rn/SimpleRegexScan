@@ -25,6 +25,7 @@ Make sure you use your correct pip for Python 3.
 ## Usage
 The usage information can be viewed with the command ``simple_regex_scan -h`` and is as follows:
 ```
+
     _____            __      ___                     ____
    / __(_)_ _  ___  / /__   / _ \___ ___ ______ __  / __/______ ____
   _\ \/ /  ' \/ _ \/ / -_) / , _/ -_) _ `/ -_) \ / _\ \/ __/ _ `/ _ \
@@ -32,8 +33,8 @@ The usage information can be viewed with the command ``simple_regex_scan -h`` an
             /_/                    /___/
 
 usage: simple_regex_scan [-h] [-c CUSTOM_REGEX [CUSTOM_REGEX ...]]
-                         [-e EXTENSION] [--no-color] -i INPUT [INPUT ...] [-A]
-                         [-N] [-u] [-f] [-k] [-s] [-x]
+                         [-e EXTENSION] [--no-color] -i INPUT [INPUT ...]
+                         [-o OUTPUT] [-A] [-N] [-u] [-f] [-k] [-s] [-S] [-x]
 
 Search files for insecure code patterns via regular expressions
 
@@ -48,34 +49,43 @@ optional arguments:
   --no-color            Do not color the output
   -i INPUT [INPUT ...], --input INPUT [INPUT ...]
                         Input one or more files or directories to search
+  -o OUTPUT, --output OUTPUT
+                        A file to save the final results to
 
 predefined regexes:
   predefined regexes that can be used
 
   -A, --all-regexes     Use all predefined regexes (default if no predefined
                         regex is explicitly specified)
-  -N, --no-regexes      Use none of the predefined regexes
+  -N, --no-regexes      Use none of the predefined regexes (defaults to true
+                        if one of the predefined regexes is explicitly
+                        specified)
   -u, --unsafe-func     Regex that indicates unsafe function usage with a
                         variable, e.g. "eval($_REQUEST['cmd'])"
   -f, --file-inclusion  Regex that indicates file inclusion via a variable,
                         e.g. "include 'modules/'.$_REQUEST['module']"
   -k, --cookie-usage    Regex that indicates usage of a cookie, e.g.
                         "$_COOKIE['ID']"
-  -s, --sqli            Regex that indicates an SQL Injection code pattern,
-                        e.g. ".. WHERE ID = \''.$_REQUEST['ID'].'\''"
-  -x, --xss             Regex that indicates an XSS code pattern, e.g.
-                        "echo 'Username: '.$_REQUEST['user']"
+  -s, --sqli            Regex that indicates an SQL Injection code pattern
+                        with direct usage of HTTP params, e.g. "... WHERE
+                        ID = \''.$_REQUEST['ID'].'\''"
+  -S, --sqli-all        Regex that indicates an SQL Injection code pattern
+                        with or without direct usage of HTTP params, e.g.
+                        "... WHERE ID = \''$id.'\''"
+  -x, --xss             Regex that indicates an XSS code pattern with direct
+                        usage of HTTP params, e.g. "echo 'Username:
+                        '.$_REQUEST['user']"
 
 Example: simple_regex_scan -ufs -i /var/www/html/mycms
 ```
 
-Simple Regex Scan provides five predefined regexes that are used by default. If any flag out of ``{-u, -f, -k, -s, -x}`` is specified, all non predefined regexes that are not explicitly specified are not used.
+Simple Regex Scan provides six predefined regexes that are used by default. If any flag out of ``{-u, -f, -k, -s, -S, -x}`` is specified, all non predefined regexes that are not explicitly specified are not used.
 
 **Example call:**
 ```
-simple_regex_scan -f -c "(eval.*(.*\\\$.*);" /var/www/html/mycms
+simple_regex_scan -f -c "(eval.*(.*\\\$.*);)" /var/www/html/mycms
 ```
-This has the tool scan all PHP files within the directory "/var/www/html/mycms" for file inclusions and the use of the ``eval(...)`` function with a variable. Note the triple backslash to properly escape the dollar sign in a shell environment. Also, because the output text can be a bit wide, be sure to stretch your terminal if you get output that is difficult to read. Alternatively you can disable colored output and print the results to a file via I/O redirection.
+This has the tool scan all PHP files within the directory "/var/www/html/mycms" for file inclusions and the use of the ``eval(...)`` function with a variable. Note the triple backslash to properly escape the dollar sign in a shell environment. Also, because the output text can be a bit wide, be sure to stretch your terminal if you get output that is difficult to read. Alternatively you can disable colored output and output the results to a file via the ``-o`` parameter.
 
 ## Contribution &amp; Bugs
 If you want to contribute, or have any questions or suggestions, use GitHub or directly contact me via Email <a href="mailto:dustin.born@gmx.de">here</a>. If you found a bug or have other troubles, feel free to open an issue.
