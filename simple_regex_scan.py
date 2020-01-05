@@ -19,6 +19,7 @@ COOKIE_REGEX = re.compile(r"([ \t]*(\$_COOKIE\[.*\]))")
 SQLI_REGEX = re.compile(r"(SELECT[^;]*FROM[^;]*WHERE[^;]*(\$\S+)[^;]*;)")
 SQLI_REGEX_DIRECT = re.compile(r"(SELECT[^;]*FROM[^;]*WHERE[^;]*(\$_(GET|POST|COOKIE)\[[^;]*\])[^;]*;)")
 XSS_REGEX = re.compile(r"[^;]*(echo[^;]*(\$_(GET|POST|COOKIE|REQUEST)\[\s*\S*\s*\])[^;]*;?)")
+SKIP_LARGER_THAN_BYTES = 50 * 2**10    # 100*2^10 Byte = 50 KiB
 
 
 def crawl(paths, extension, use_color):
@@ -79,7 +80,13 @@ def scan(files, regexes, use_color):
                 print_str = "Progress: [" + colored(percent * "=", "green") + (100 - percent) * "·" + "]  " + str(percent) + "%% (%d / %d files)" % (i, total)
             else:
                 print_str = "Progress: [" + percent * "=" + (100 - percent) * "·" + "]  " + str(percent) + "%% (%d / %d files)" % (i, total)
-            print(print_str, end="\r")
+            print("\033[K" + print_str, end="\r")
+
+        if os.path.isfile(file):  # check to be sure
+            file_size = os.stat(file).st_size
+            if file_size > SKIP_LARGER_THAN_BYTES:
+                continue
+
         with open(file, "rb") as f:
             # read binary file content, determine encoding and decode appropriately
             content = f.read()
