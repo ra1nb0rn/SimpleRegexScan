@@ -8,7 +8,7 @@ A small script that searches files for insecure code patterns via regular expres
 </p>
 
 ## About
-Simple Regex Scan is a Python 3 script that uses regular expressions to statically search code for insecure coding patterns. As such, not every discovered code fragment has to be indeed insecure. This tool **does not** analyze the information flow within code and consequently a fair amount of false positives may occur. This tool was primarily made for PHP code, but can also be used for other types of code. The tool can also accept custom Regexes as input that help to identify user-defined code patterns within the analyzed code. For performance reasons, files greater than 50 KiB are skipped during the scan.
+Simple Regex Scan is a Python 3 script that uses regular expressions to statically search code for insecure coding patterns. As such, not every discovered code fragment has to be indeed insecure. This tool **does not** analyze the information flow within code and consequently a fair amount of false positives may occur. This tool was primarily made for PHP code, but can also be used for other types of code. The tool can also accept custom Regexes as input that help to identify user-defined code patterns within the analyzed code. For performance reasons, files larger than 50 KiB are skipped during the scan.
 
 ## Installation
 To install the required Python packages and create a symlink, run:

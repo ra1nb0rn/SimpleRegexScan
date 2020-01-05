@@ -176,6 +176,7 @@ def get_regexes(args):
     """ Return all regexes that are to be used for the scan """
 
     # include predefined regexes as specified by the user
+    regexes = {}
     if args.all_regexes:
         regexes = {
             "function usage": UNSAFE_FUNCTION_REGEX,
@@ -184,21 +185,20 @@ def get_regexes(args):
             "sqli": SQLI_REGEX,
             "xss": XSS_REGEX
         }
-    else:
-        regexes = {}
-        if args.unsafe_func:
-            regexes["function usage"] = UNSAFE_FUNCTION_REGEX
-        if args.file_inclusion:
-            regexes["file inclusion"] = FILE_INCLUSION_REGEX
-        if args.cookie_usage:
-            regexes["cookie usage"] = COOKIE_REGEX
-        if args.xss:
-            regexes["xss"] = XSS_REGEX
 
-        if args.sqli_all:
-            regexes["sqli"] = SQLI_REGEX
-        elif args.sqli:
-            regexes["sqli"] = SQLI_REGEX_DIRECT
+    if args.unsafe_func:
+        regexes["function usage"] = UNSAFE_FUNCTION_REGEX
+    if args.file_inclusion:
+        regexes["file inclusion"] = FILE_INCLUSION_REGEX
+    if args.cookie_usage:
+        regexes["cookie usage"] = COOKIE_REGEX
+    if args.xss:
+        regexes["xss"] = XSS_REGEX
+
+    if args.sqli_all:
+        regexes["sqli"] = SQLI_REGEX
+    elif args.sqli:
+        regexes["sqli"] = SQLI_REGEX_DIRECT
 
     # include user-custom regexes if any
     if args.custom_regex:
@@ -221,7 +221,7 @@ def parse_args():
 
     # add arguments for the usage of the predefined regexes
     predef_regexes = parser.add_argument_group("predefined regexes", "predefined regexes that can be used")
-    predef_regexes.add_argument("-A", "--all-regexes", default=True, action="store_true", help="Use all predefined regexes (default if no predefined regex is explicitly specified)")
+    predef_regexes.add_argument("-A", "--all-regexes", default=False, action="store_true", help="Use all predefined regexes (default if no predefined regex is explicitly specified)")
     predef_regexes.add_argument("-N", "--no-regexes", default=False, action="store_true", help="Use none of the predefined regexes (defaults to true if one of the predefined regexes is explicitly specified)")
     predef_regexes.add_argument("-u", "--unsafe-func", action="store_true", help="Regex that indicates unsafe function usage with a variable, e.g. \"%s\"" % colored("eval($_REQUEST['cmd'])", "yellow"))
     predef_regexes.add_argument("-f", "--file-inclusion", action="store_true", help="Regex that indicates file inclusion via a variable, e.g. \"%s\"" % colored("include 'modules/'.$_REQUEST['module']", "yellow"))
@@ -234,10 +234,13 @@ def parse_args():
     args = parser.parse_args()
     if not args.extension.startswith("."):
         args.extension = "." + args.extension
-    if args.no_regexes:
-        args.all_regexes = False
+
     if args.unsafe_func or args.file_inclusion or args.cookie_usage or args.sqli or args.sqli_all or args.xss:
-        args.all_regexes = False
+        if not args.all_regexes:
+            args.all_regexes = False
+    elif not args.no_regexes:
+        args.all_regexes = True
+
     if args.custom_regex:
         for i, regex in enumerate(args.custom_regex):
             # compile custom regexes before use
