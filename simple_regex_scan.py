@@ -12,12 +12,12 @@ import chardet
 # Definition of predefined regexes
 UNSAFE_FUNCTIONS = ["system", "shell_exec", "exec", "passthru", "eval", "popen", "unserialize", "file_put_contents"]
 UNSAFE_FUNCTION_REGEX = re.compile(r"([ \t]*(%s)\s*\([^;]*\$[^;]*\)[^;]*;?)" % "|".join(UNSAFE_FUNCTIONS))
-UNSAFE_FUNCTION_REGEX_DIRECT_INPUT = re.compile(r"([ \t]*(%s)\s*\([^;]*\$_(GET|POST|COOKIE)\[[^;]*\][^;]*\)[^;]*;?)" % "|".join(UNSAFE_FUNCTIONS))
+UNSAFE_FUNCTION_REGEX_DIRECT_INPUT = re.compile(r"([ \t]*(%s)\s*\([^;]*\$_(GET|POST|REQUEST|COOKIE)\[[^;]*\][^;]*\)[^;]*;?)" % "|".join(UNSAFE_FUNCTIONS))
 FILE_INCLUSION_FUNCTIONS = ["include", "include_once", "require", "require_once"]
 FILE_INCLUSION_REGEX = re.compile(r"([ \t]*(%s)[\( ][^=\n]*\$[^;]*;?)" % "|".join(FILE_INCLUSION_FUNCTIONS))
 COOKIE_REGEX = re.compile(r"([ \t]*(\$_COOKIE\[.*\]))")
 SQLI_REGEX = re.compile(r"(SELECT[^;]*FROM[^;]*WHERE[^;]*(\$\S+)[^;]*;)")
-SQLI_REGEX_DIRECT = re.compile(r"(SELECT[^;]*FROM[^;]*WHERE[^;]*(\$_(GET|POST|COOKIE)\[[^;]*\])[^;]*;)")
+SQLI_REGEX_DIRECT = re.compile(r"(SELECT[^;]*FROM[^;]*WHERE[^;]*(\$_(GET|POST|REQUEST|COOKIE)\[[^;]*\])[^;]*;)")
 XSS_REGEX = re.compile(r"[^;]*(echo[^;]*(\$_(GET|POST|COOKIE|REQUEST)\[\s*\S*\s*\])[^;]*;?)")
 SKIP_LARGER_THAN_BYTES = 50 * 2**10    # 100*2^10 Byte = 50 KiB
 
