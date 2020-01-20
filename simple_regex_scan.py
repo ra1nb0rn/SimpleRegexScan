@@ -249,6 +249,8 @@ def parse_args():
 
     if args.custom_regex:
         for i, regex in enumerate(args.custom_regex):
+            if not regex.startswith("("):
+                regex = r"(" + regex + r")"
             # compile custom regexes before use
             args.custom_regex[i] = re.compile(regex)
 
