@@ -144,6 +144,12 @@ def scan(files, regexes, use_color):
                 if longest_line_matches:
                     # determine on what line the match was found, skip already matched lines
                     sorted_line_matches = sorted(longest_line_matches.keys())
+
+                    # for now, two matches on one line are not handled properly when searching
+                    # for the matched line number, which can cause an IndexError without this if statement
+                    if found_counts[finding] >= len(sorted_line_matches):
+                        continue
+
                     lineno = sorted_line_matches[found_counts[finding]] + 1
                     found_counts[finding] += 1
 
