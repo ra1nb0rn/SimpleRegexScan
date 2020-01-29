@@ -90,14 +90,16 @@ def scan(files, regexes, use_color):
         with open(file, "rb") as f:
             # read binary file content, determine encoding and decode appropriately
             content = f.read()
-            encoding = chardet.detect(content)["encoding"]
-            if encoding:
-                content = content.decode(encoding)
-            else:
+
+            try:
+                content = content.decode()
+            except UnicodeDecodeError:
+                encoding = chardet.detect(content)["encoding"]
                 try:
-                    content = content.decode()
+                    content = content.decode(encoding)
                 except UnicodeDecodeError:
                     # if content cannot be decoded, skip the file
+                    cprint("Warning: Could not decode file '%s'" % file, "red")
                     continue
 
         # match all used regexes against the file contents
