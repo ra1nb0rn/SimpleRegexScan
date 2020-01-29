@@ -10,7 +10,7 @@ from terminaltables import AsciiTable
 import chardet
 
 # Definition of predefined regexes
-UNSAFE_FUNCTIONS = ["system", "shell_exec", "exec", "passthru", "eval", "popen", "unserialize", "file_put_contents"]
+UNSAFE_FUNCTIONS = ["system", "shell_exec", "exec", "passthru", "eval", "assert", "popen", "pcntl_exec", "``", "proc_open", "unserialize", "file_put_contents"]
 UNSAFE_FUNCTION_REGEX = re.compile(r"([ \t]*(%s)\s*\([^;]*\$[^;]*\)[^;]*;?)" % "|".join(UNSAFE_FUNCTIONS))
 UNSAFE_FUNCTION_REGEX_DIRECT_INPUT = re.compile(r"([ \t]*(%s)\s*\([^;]*\$_(GET|POST|REQUEST|COOKIE)\[[^;]*\][^;]*\)[^;]*;?)" % "|".join(UNSAFE_FUNCTIONS))
 FILE_INCLUSION_FUNCTIONS = ["include", "include_once", "require", "require_once"]
